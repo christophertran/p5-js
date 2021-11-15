@@ -2,6 +2,8 @@ let snake;
 let scl = 20;
 let cols, rows;
 let food;
+let scoreP;
+let highscore, highscoreP;
 
 function setup() {
     createCanvas(600, 600);
@@ -13,10 +15,23 @@ function setup() {
     snake = new Snake(width, height, scl);
 
     food = createFood();
+
+    scoreP = createP("");
+    scoreP.style("font-size", "32pt");
+    scoreP.html(`Score: ${snake.score()}`);
+
+    highscore = 0;
+    highscoreP = createP("");
+    highscoreP.style("font-size", "32pt");
+    highscoreP.html(`High Score: ${highscore}`);
 }
 
 function draw() {
     background(0);
+
+    highscore = max(highscore, snake.score());
+    highscoreP.html(`High Score: ${highscore}`);
+    scoreP.html(`Score: ${snake.score()}`);
 
     if (snake.dead()) {
         snake.reset();
@@ -95,8 +110,20 @@ class Snake {
 
         this.x += this.xspeed * this.scl;
         this.y += this.yspeed * this.scl;
-        this.x = constrain(this.x, 0, this.w - this.scl);
-        this.y = constrain(this.y, 0, this.h - this.scl);
+
+        // Width wrap around
+        if (this.x >= width) {
+            this.x = 0;
+        } else if (this.x < 0) {
+            this.x = width - scl;
+        }
+
+        // Height wrap around
+        if (this.y >= height) {
+            this.y = 0;
+        } else if (this.y < 0) {
+            this.y = height - scl;
+        }
     }
 
     dir(x, y) {
@@ -114,23 +141,6 @@ class Snake {
     }
 
     dead() {
-        // let head;
-        // if (this.tail.length > 0) {
-        //     let end = this.tail.length - 1;
-        //     head = { x: this.tail[end].x, y: this.tail[end].y };
-        // } else {
-        //     head = { x: this.x, y: this.y };
-        // }
-
-        // if (head.x == 0 || head.x == width || head.y == 0 || head.y == length) {
-        // }
-
-        // for (let i = 0; i < this.tail.length; i++) {
-        //     if (dist(head.x, head.y, this.tail[i].x, this.tail[i].y) <= 1) {
-        //         return true;
-        //     }
-        // }
-
         for (let i = 0; i < this.tail.length; i++) {
             if (dist(this.x, this.y, this.tail[i].x, this.tail[i].y) <= 1) {
                 return true;
@@ -148,5 +158,9 @@ class Snake {
 
         this.total = 0;
         this.tail = [];
+    }
+
+    score() {
+        return this.tail.length;
     }
 }
